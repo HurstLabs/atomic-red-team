@@ -63,6 +63,12 @@ function Invoke-AtomicTest {
             ValueFromPipelineByPropertyName = $true,
             ParameterSetName = 'technique')]
         [switch]
+        $Obfuscate = $false,
+
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true,
+            ParameterSetName = 'technique')]
+        [switch]
         $Cleanup = $false,
 
         [Parameter(Mandatory = $false,
@@ -215,6 +221,17 @@ function Invoke-AtomicTest {
                         foreach ($key in $inputArgs.Keys) {
                             $findValue = '#{' + $key + '}'
                             $finalCommand = $finalCommand.Replace($findValue, $inputArgs[$key])
+                        }
+                    }
+
+                    if($Obfuscate -and ($null -ne $finalCommand)) {
+                        if($ShowDetails){
+                            $ObfuCommand = Out-EncodedAsciiCommand  -ScriptBlock {"$finalCommand"}  -PassThru
+                            Write-Information -MessageData "Deobfuscated Command $finalCommand , Obfuscated Command $ObfuCommand"
+                            $finalCommand = $ObfuCommand
+                        }
+                        else{
+                            $finalCommand = Out-EncodedAsciiCommand  -ScriptBlock {"$finalCommand"} -PassThru
                         }
                     }
 
